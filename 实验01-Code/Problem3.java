@@ -38,7 +38,7 @@ class VermanCipher{
         inputText=new StringBuffer();
         key=new StringBuffer();
         sc=new Scanner(System.in);
-        int tmp;
+        //int tmp;
         
         /**
          * 获取输入,按空格划分先转换成Int数字,再转换成char数字存储
