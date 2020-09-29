@@ -1,3 +1,4 @@
+/** 暴力破解凯撒密码 */
 class Probelm4_1{
     StringBuffer cipherText=new StringBuffer("itrs zr trtzk");
     public void exhasutiveDecrypt(){

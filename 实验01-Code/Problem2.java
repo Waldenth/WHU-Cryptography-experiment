@@ -1,5 +1,6 @@
 import java.util.Scanner;
 
+/** 凯撒密码(加法密码) */
 class Problem2_1{   //Caesar cipher
     StringBuffer inputText=new StringBuffer();
     Scanner sc=new Scanner(System.in);

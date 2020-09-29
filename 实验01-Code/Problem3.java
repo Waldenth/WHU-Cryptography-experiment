@@ -1,5 +1,6 @@
 import java.util.Scanner;
 
+/** 代数密码-Vernam密码 */
 class VermanCipher{
     StringBuffer inputText;
     private StringBuffer key;
