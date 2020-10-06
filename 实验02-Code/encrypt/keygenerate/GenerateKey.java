@@ -22,7 +22,10 @@ public class GenerateKey{
         3,28,15,6,21,10,
         23,19,12,4,26,8,
         16,7,27,20,13,2,
-        41,52,31,
+        41,52,31,37,47,55,
+        30,40,51,45,33,48,
+        44,49,39,56,34,53,
+        46,42,50,36,29,32
     };
    
     /** 循环左移位数表 */
@@ -55,13 +58,13 @@ public class GenerateKey{
             C=SAL(C,moveNums[i]);
             D=SAL(D,moveNums[i]);
             for(int j=0;j<48;j++){
-                
+                //合并的CD,C是前28位,D是后28位
+                if(replace2[j]<=28)
+                    subKeys[i][j]=C[replace2[j]-1];//第i个子密钥的第j位
+                else
+                    subKeys[i][j]=D[replace2[j]-28-1];
             }
         }
-
-        
         return subKeys;
     }
-
-    
 }
