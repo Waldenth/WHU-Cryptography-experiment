@@ -8,7 +8,7 @@ public class ENCRYPT {
             c[i] = (byte) (a[i] ^ b[i]);
         return c;
     }
-    public static byte[] encryptData(byte[]plainText,byte[]key64){
+    public static byte[] encryptData(byte[]plainText,byte[]key64,boolean...isOutputLog){
         byte[] cipherText=new byte[64];
         //产生子密钥
         byte[][] subkeys=GenerateKey.GeneateSubkeys(key64);
@@ -21,18 +21,6 @@ public class ENCRYPT {
             L[0][i] = plainText[i];
             R[0][i] = plainText[i + 32];
         }
-        /*
-        for(int i=0;i<L[0].length;i++){
-            System.out.print(L[0][i]+" ");
-        }
-        System.out.println("");
-
-        for(int i=0;i<R[0].length;i++){
-            System.out.print(R[0][i]+" ");
-        }
-        System.out.println("");
-        */
-
         //16次迭代加密
         for(int i=1;i<=16;i++){
             L[i]=R[i-1];
@@ -44,6 +32,23 @@ public class ENCRYPT {
             cipherText[i+32]=L[16][i];
         }
         cipherText=IP_inverse.InitalPermutationInverse(cipherText);
+        if(isOutputLog.length!=0){
+            if(isOutputLog[0]){
+                System.out.println("+-------------------------------------------+");       
+                for(int i=0;i<17;i++){
+                    System.out.printf("|  L%2d: ",i);
+                    for(byte tmp:L[i])
+                        System.out.print(tmp);
+                    System.out.printf("    |\n");
+                    System.out.printf("|  R%2d: ",i);
+                    for(byte tmp:R[i])
+                        System.out.print(tmp);
+                    System.out.printf("    |\n");
+                    System.out.print("|                                           |\n");
+                }
+                System.out.println("+-------------------------------------------+");   
+            }
+        }
         return cipherText;
     }
 }
