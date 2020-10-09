@@ -1,7 +1,10 @@
+import java.io.BufferedWriter;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Arrays;
 
 import encrypt.keygenerate.*;
 import encrypt.*;
@@ -17,7 +20,7 @@ public class Test {
         0,0,1,1,0,1,1,1,
         0,0,1,1,1,0,0,0,
     };
-    static byte plainTextForTest[]={
+    static byte[] plainTextForTest={
         0,0,1,1,0,0,0,0,
         0,0,1,1,0,0,0,1,
         0,0,1,1,0,0,1,0,
@@ -27,7 +30,7 @@ public class Test {
         0,0,1,1,0,1,1,0,
         0,0,1,1,0,1,1,1
     };
-    static byte cipherTextForTest[]={
+    static byte[] cipherTextForTest={
         1,0,0,0,1,0,1,1, 
         1,0,1,1,0,1,0,0, 
         0,1,1,1,1,0,1,0, 
@@ -107,18 +110,96 @@ public class Test {
         System.out.println(recover);
         */
         //TestEncrypt();
-        TestDecrypt();
+        //TestDecrypt();
+        EncryptFiles("key.txt","data.txt");
     }
-    //给定路径,加密文件    
+    //给定路径,加密文件,暂时只支持UTF-8    
     public static boolean EncryptFiles(String keyPath,String filePath) throws IOException{
         /*
         Path filepath = Paths.get(path);
         char[] keyarray=(Files.readString(filepath).replaceAll("(\r\n|\r|\n|\n\r|\\s*)", "") ).toCharArray();
         */
         char[]keyArray=Files.readString(Paths.get(keyPath)).replaceAll("(\r\n|\r|\n|\n\r|\\s*)", "").toCharArray();;
+        if(keyArray.length!=64){
+            System.out.println("Error: the key length is not right (need 64 bits)");
+            return false;
+        }
+        byte[]key64=new byte[64];
+        for(int i=0;i<64;i++){
+            key64[i]=(byte)(keyArray[i]-'0');
+        }
+        String dataFlow=Files.readString(Paths.get(filePath));
+        byte[] data=dataFlow.getBytes("UTF-8");
+        StringBuffer bitString=new StringBuffer();
+        for(int i=0;i<data.length;i++){
+            bitString.append(Integer.toBinaryString(data[i]));
+        }
         
-        return false;
+        byte bitdata[]=new byte[bitString.length()];
+        for(int i=0;i<bitString.length();i++){
+            bitdata[i]=(byte)(bitString.charAt(i)-'0');
+        }
+        //有多少个完整的64bit
+        int fullyEncryptSegment=bitdata.length/64;
+
+        //生成子密钥
+        byte[][] subkeys=GenerateKey.GeneateSubkeys(key64);
+
+        for(int i=0;i<fullyEncryptSegment;i++){
+            byte[] tmpCipherText=ENCRYPT.encryptData(Arrays.copyOfRange(bitdata, i*64, i*64+64), key64);
+            System.arraycopy(tmpCipherText,0,bitdata, i*64, 64);
+        }
+        /*
+        System.out.println(bitdata.length);      
+        for(int i=0;i<bitdata.length;i++){
+            System.out.print(bitdata[i]);
+            if((i+1)%8==0)
+                System.out.print(" ");
+        }
+
+        System.out.println("");
+        */
+        byte[]cipherText=ConvertBitToByte(bitdata);
+        /*
+        for(int i=0;i<cipherText.length;i++){
+            System.out.print(cipherText[i]);
+            if((i+1)%8==0)
+                System.out.print(" ");
+        }
+
+        String cipherStr=new String(cipherText,"UTF-8");
+        System.out.println(cipherStr);
+        */
+        String cipherStr=new String(cipherText,"UTF-8");
+        BufferedWriter out = new BufferedWriter(new FileWriter("密文.txt"));
+        System.out.println(cipherStr);
+        out.write(new String(cipherText,"UTF-8"));
+        out.close();
+        System.out.println("加密文件创建成功！");
+
+        return true;
     }
+    static byte[] ConvertBitToByte(byte[] input){
+        byte[] bts=new byte[input.length/8];
+        StringBuffer tmp;
+        int k=0;
+        for(int i=0;i<input.length;i+=8){
+            tmp=new StringBuffer();
+            for(int j=0;j<8;j++){
+                char c=(char)('0'+(int)input[i+j]);
+                tmp.append(c);
+            }
+            //System.out.println(tmp.toString());
+            bts[k]=(byte)Integer.parseInt(tmp.toString(),2);
+            k++;
+        }
+        return bts;
+    }
+
+
+
+    
+
     //测试加密
     public static void TestEncrypt(){
         System.out.println("+-------------------------+");
