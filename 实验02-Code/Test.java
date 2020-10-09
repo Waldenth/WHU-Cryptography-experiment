@@ -1,4 +1,6 @@
 import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -130,15 +132,28 @@ public class Test {
         }
         String dataFlow=Files.readString(Paths.get(filePath));
         byte[] data=dataFlow.getBytes("UTF-8");
+
+        //System.out.println("SourcedataBytes="+data.length);
+
         StringBuffer bitString=new StringBuffer();
         for(int i=0;i<data.length;i++){
-            bitString.append(Integer.toBinaryString(data[i]));
+            String tmp=Integer.toBinaryString(data[i]);
+            if(tmp.length()<8){
+                for(int j=0;j<8-tmp.length();j++)
+                    tmp="0"+tmp;
+            }else if(tmp.length()>8){
+                tmp=tmp.substring(tmp.length()-8);
+            }
+            bitString.append(tmp);
         }
-        
+
         byte bitdata[]=new byte[bitString.length()];
         for(int i=0;i<bitString.length();i++){
             bitdata[i]=(byte)(bitString.charAt(i)-'0');
         }
+
+        //System.out.println("bitStr="+bitString.length()+" bitdata="+bitdata.length);
+
         //有多少个完整的64bit
         int fullyEncryptSegment=bitdata.length/64;
 
@@ -160,6 +175,9 @@ public class Test {
         System.out.println("");
         */
         byte[]cipherText=ConvertBitToByte(bitdata);
+
+        //System.out.println("bit="+bitdata.length+" Text="+cipherText.length);
+
         /*
         for(int i=0;i<cipherText.length;i++){
             System.out.print(cipherText[i]);
@@ -171,14 +189,28 @@ public class Test {
         System.out.println(cipherStr);
         */
         String cipherStr=new String(cipherText,"UTF-8");
+        System.out.println("+--------------------------+");
+        System.out.println("|    UTF-8编码的密文       |");
+        System.out.println("+--------------------------+");
+        System.out.println(cipherStr);
+        /*
         BufferedWriter out = new BufferedWriter(new FileWriter("密文.txt"));
         System.out.println(cipherStr);
-        out.write(new String(cipherText,"UTF-8"));
+        out.write(cipherText);
+        //out.write(cipherText[0]);
         out.close();
         System.out.println("加密文件创建成功！");
-
+        */
+        File file = new File("密文.txt");  //创建文件对象
+        FileOutputStream output = new FileOutputStream(file);
+        output.write(cipherText);
+        output.close();
+        System.out.println("+-----------------+");
+        System.out.println("|  导出密文成功!  |");
+        System.out.println("+-----------------+");
         return true;
     }
+
     static byte[] ConvertBitToByte(byte[] input){
         byte[] bts=new byte[input.length/8];
         StringBuffer tmp;
@@ -195,10 +227,6 @@ public class Test {
         }
         return bts;
     }
-
-
-
-    
 
     //测试加密
     public static void TestEncrypt(){
