@@ -1,5 +1,6 @@
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -114,6 +115,7 @@ public class Test {
         //TestEncrypt();
         //TestDecrypt();
         EncryptFiles("key.txt","data.txt");
+        DecryptFiles("key.txt", "密文.txt");
     }
     //给定路径,加密文件,暂时只支持UTF-8    
     public static boolean EncryptFiles(String keyPath,String filePath) throws IOException{
@@ -139,7 +141,8 @@ public class Test {
         for(int i=0;i<data.length;i++){
             String tmp=Integer.toBinaryString(data[i]);
             if(tmp.length()<8){
-                for(int j=0;j<8-tmp.length();j++)
+                int curLength=tmp.length();
+                for(int j=0;j<8-curLength;j++)
                     tmp="0"+tmp;
             }else if(tmp.length()>8){
                 tmp=tmp.substring(tmp.length()-8);
@@ -171,7 +174,6 @@ public class Test {
             if((i+1)%8==0)
                 System.out.print(" ");
         }
-
         System.out.println("");
         */
         byte[]cipherText=ConvertBitToByte(bitdata);
@@ -184,7 +186,6 @@ public class Test {
             if((i+1)%8==0)
                 System.out.print(" ");
         }
-
         String cipherStr=new String(cipherText,"UTF-8");
         System.out.println(cipherStr);
         */
@@ -210,8 +211,89 @@ public class Test {
         System.out.println("+-----------------+");
         return true;
     }
+    public static boolean DecryptFiles(String keyPath,String filePath)throws IOException{
+        char[]keyArray=Files.readString(Paths.get(keyPath)).replaceAll("(\r\n|\r|\n|\n\r|\\s*)", "").toCharArray();;
+        if(keyArray.length!=64){
+            System.out.println("Error: the key length is not right (need 64 bits)");
+            return false;
+        }
+        byte[]key64=new byte[64];
+        for(int i=0;i<64;i++){
+            key64[i]=(byte)(keyArray[i]-'0');
+        }
+        File file=new File("密文.txt");
+        byte[] data=new byte[(int)file.length()];
+        FileInputStream input=new FileInputStream(file);
+        for(int i=0;i<data.length;i++){
+            data[i]=(byte)input.read();
+        }    
+        
+        StringBuffer bitString=new StringBuffer();
+        for(int i=0;i<data.length;i++){
+            String tmp=Integer.toBinaryString(data[i]);
+            if(tmp.length()<8){
+                int curLength=tmp.length();
+                for(int j=0;j<8-curLength;j++)
+                    tmp="0"+tmp;
+            }else if(tmp.length()>8){
+                tmp=tmp.substring(tmp.length()-8);
+            }
+            bitString.append(tmp);
+        }
+        /*
+        String dataFlow=Files.readString(Paths.get(filePath));
+        byte[] data=dataFlow.getBytes();
 
-    static byte[] ConvertBitToByte(byte[] input){
+        StringBuffer bitString=new StringBuffer();
+        for(int i=0;i<data.length;i++){
+            String tmp=Integer.toBinaryString(data[i]);
+            if(tmp.length()<8){
+                int curLength=tmp.length();
+                for(int j=0;j<8-curLength;j++)
+                    tmp="0"+tmp;
+            }else if(tmp.length()>8){
+                tmp=tmp.substring(tmp.length()-8);
+            }
+            bitString.append(tmp);
+        }
+        */
+
+        byte bitdata[]=new byte[bitString.length()];
+        for(int i=0;i<bitString.length();i++){
+            bitdata[i]=(byte)(bitString.charAt(i)-'0');
+        }
+
+        //有多少个完整的64bit
+        int fullyEncryptSegment=bitdata.length/64;
+        //生成子密钥
+        byte[][] subkeys=GenerateKey.GeneateSubkeys(key64);
+
+        for(int i=0;i<fullyEncryptSegment;i++){
+            byte[] tmpCipherText=DECRYPT.decryptData(Arrays.copyOfRange(bitdata, i*64, i*64+64), key64);
+            System.arraycopy(tmpCipherText,0,bitdata, i*64, 64);
+        }
+
+        byte[]plainText=ConvertBitToByte(bitdata);
+
+        String plainStr=new String(plainText,"UTF-8");
+        System.out.println("+--------------------------+");
+        System.out.println("|   UTF-8编码的解密明文    |");
+        System.out.println("+--------------------------+");
+        System.out.println(plainStr);
+
+        file=new File("解密明文.txt");
+        FileOutputStream output = new FileOutputStream(file);
+        output.write(plainText);
+        output.close();
+        System.out.println("+-----------------+");
+        System.out.println("|  导出明文成功!  |");
+        System.out.println("+-----------------+");
+        return true;
+
+    }
+
+
+    public static byte[] ConvertBitToByte(byte[] input){
         byte[] bts=new byte[input.length/8];
         StringBuffer tmp;
         int k=0;
