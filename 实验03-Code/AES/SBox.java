@@ -1,5 +1,4 @@
-package encrypt;
-
+package AES;
 public class SBox {
 	static String Box[][]= {
 			{"63","CA","B7","04","09","53","D0","51","CD","60","E0","E7","BA","70","E1","8C"},
@@ -25,16 +24,16 @@ public class SBox {
 	static void TestBox() {
 		byte input=81;
 		String hexStr=Integer.toHexString(input);
-		System.out.println("S盒输入 (16进制):0x"+hexStr);
+		System.out.println("+------------------+");
+		System.out.println("|      表格题      |");
+		System.out.println("+------------------+--------+");
+		System.out.println("|   S盒输入 (16进制):0x"+hexStr+"   |");
 		int high=Integer.parseInt(hexStr.substring(0,1),16);
 		int low=Integer.parseInt(hexStr.substring(1, 2),16);
 		String outputStr=Box[low][high];
-		System.out.println("S盒输出 (10进制):"+Integer.parseInt(outputStr,16));
-		System.out.println("S盒输出 (16进制):0x"+outputStr);
-	}
-	
-	public static void main(String[]args) {
-		TestBox();
+		System.out.println("|   S盒输出 (10进制):"+Integer.parseInt(outputStr,16)+"    |");
+		System.out.println("|   S盒输出 (16进制):0x"+outputStr+"   |");
+		System.out.println("+---------------------------+");
 	}
 }
 
