@@ -1,5 +1,5 @@
 package AES;
-public class SBox {
+public class SBoxProblem {
 	static String Box[][]= {
 			{"63","CA","B7","04","09","53","D0","51","CD","60","E0","E7","BA","70","E1","8C"},
 			{"7C","82","FD","C7","83","D1","EF","A3","0C","81","32","C8","78","3E","F8","A1"},
