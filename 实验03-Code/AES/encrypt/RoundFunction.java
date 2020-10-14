@@ -9,10 +9,11 @@ public class RoundFunction {
     }
     
     public static byte[][] ByteSub(byte[][] input){
-        for(int i=0;i<input[0].length;i++){
-            for(int j=0;j<input[i].length;j++){
+        for(int i=0;i<4;i++){
+            for(int j=0;j<4;j++){
                 int low=(input[i][j])&(0b00001111);
-                int high=((input[i][j])&(0b11110000)>>>4);
+                int high=((input[i][j])&(0b11110000))>>>4;
+                //System.out.println("high="+high+" low="+low);
                 input[i][j]=SBoxes.SBox[high][low];
             }
         }
@@ -21,7 +22,11 @@ public class RoundFunction {
 
     public static byte[][] ShiftRow(byte[][] input){
         byte[][]temp=new byte[input.length][input[0].length];
-        System.arraycopy(input, 0, temp, 0, 4);
+        for(int i=0;i<input.length;i++){
+            for(int j=0;j<input[i].length;j++){
+                temp[i][j]=input[i][j];
+            }
+        }
         
         input[1][0]=temp[1][1];input[1][1]=temp[1][2];input[1][2]=temp[1][3];input[1][3]=temp[1][0];
         input[2][0]=temp[2][2];input[2][1]=temp[2][3];input[2][2]=temp[2][0];input[2][3]=temp[2][1];
@@ -43,15 +48,41 @@ public class RoundFunction {
 
         for(int i=0;i<4;i++){
             for(int j=0;j<4;j++){
-                temp[i]=input[j][i];
+                temp[j]=input[j][i];
             }
             temp=MatrixTimesAES(mixMatrix, temp);
             for(int j=0;j<4;j++){
-                input[j][i]=temp[i];
+                input[j][i]=temp[j];
             }
         }
         return input;
     }
+
+    public static byte[][] AddRoundKey(byte[][] input,int[] RoundKey,int i){
+        byte[][] op2=GenerateByteArray2(RoundKey, i);
+        for(int j=0;j<4;j++){
+            for(int k=0;k<4;k++){
+                input[j][k]=(byte)(input[j][k]^op2[j][k]);
+            }
+        }
+        return input;
+    }
+
+    public static byte[][] GenerateByteArray2(int[] RoundKey,int i){
+        byte[][]res=new byte[4][4];
+        byte[] temp=new byte[4];
+        for(int j=0;j<4;j++){
+            temp[0]=(byte)(RoundKey[i+j]>>>24);
+            temp[1]=(byte)(RoundKey[i+j]>>>16);
+            temp[2]=(byte)(RoundKey[i+j]>>>8);
+            temp[3]=(byte)(RoundKey[i+j]);
+            for(int k=0;k<4;k++){
+                res[k][j]=temp[k];
+            }
+        }
+        return res;
+    }
+
 
     public static byte GFtime(byte input1,byte input2){
         byte ans=0;
@@ -88,14 +119,14 @@ public class RoundFunction {
         return ans;
     }
 
-    private static void Test(){
+    public static void TestRoundFunction(){
         byte[][] mixMatrix={
             {0x02,0x03,0x01,0x01},
             {0x01,0x02,0x03,0x01},
             {0x01,0x01,0x02,0x03},
             {0x03,0x01,0x01,0x02}
         };
-        byte[] inputData={(byte)0x4f,(byte)0xb1,(byte)0xe8,(byte)0x4f};
+        byte[] inputData={(byte)0x4d,(byte)0x90,(byte)0x4a,(byte)0xd8};
         byte[] outputata=MatrixTimesAES(mixMatrix, inputData);
         for(int i=0;i<4;i++){
             System.out.printf("0x%x\n",outputata[i]);
