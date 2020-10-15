@@ -1,4 +1,4 @@
-package AES.encrypt.keygenerate;
+package AES.keygenerate;
 
 import java.util.Arrays;
 

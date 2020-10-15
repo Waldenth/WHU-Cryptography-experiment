@@ -1,6 +1,6 @@
 package AES.encrypt;
 
-import AES.encrypt.keygenerate.KeyExpansion;
+import AES.keygenerate.KeyExpansion;
 
 public class ENCRYPT {
     public static byte[]encryptData(byte[] messageData,byte[] key){
@@ -44,7 +44,7 @@ public class ENCRYPT {
         return messageData;
     }
 
-    public static byte[][] ConvertToMatrix(byte[]input){
+    private static byte[][] ConvertToMatrix(byte[]input){
         if(input.length!=16){
             System.out.println("Error: can not convert to 4x4 matrix");
             System.exit(-1);
@@ -61,7 +61,7 @@ public class ENCRYPT {
         return output;
     }
 
-    public static byte[] ConvertToArray(byte[][]input){
+    private static byte[] ConvertToArray(byte[][]input){
         if(input.length!=4||input[0].length!=4){
             System.out.println("Error:can not convert to Array which's length is 16");
             System.exit(-1);
@@ -85,7 +85,7 @@ public class ENCRYPT {
     }
 
 
-    public static void main(String[]args){
+    public static void TestEncrypt(){
         byte[] messageData={
             0x00,0x01,0x00,0x01,0x01,(byte)0xa1,(byte)0x98,(byte)0xaf,(byte)0xda,0x78,0x17,0x34,(byte)0x86,0x15,0x35,0x66
         };
