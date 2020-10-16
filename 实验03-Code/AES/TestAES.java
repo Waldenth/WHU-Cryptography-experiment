@@ -8,5 +8,12 @@ public class TestAES {
         SBoxProblem.TestBox();
         ENCRYPT.TestEncrypt();
         DECRYPT.TestDecrypt();
+        String key="abcdabcdabcdabcd";
+        byte[]tmp=key.getBytes();
+        System.out.println(tmp.length);
+        FileAPI.EncryptFiles("key.txt", true, "plainText.txt","MycipherText.txt");
+        FileAPI.DecryptFiles("key.txt", true, "MycipherText.txt","MydecryptedText.txt");
+        FileAPI.EncryptFiles(key, false, "plainText.txt");
+        FileAPI.DecryptFiles(key, false, "cipherText.txt");
     }
 }
