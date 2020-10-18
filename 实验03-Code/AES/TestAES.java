@@ -13,12 +13,15 @@ public class TestAES {
         String key="abcdabcdabcdabcd";
         byte[]tmp=key.getBytes();
         System.out.println(tmp.length);
-        FileAPI.EncryptFiles("key.txt", true, "plainText.txt","MycipherText.txt");
-        FileAPI.DecryptFiles("key.txt", true, "MycipherText.txt","MydecryptedText.txt");
-        FileAPI.EncryptFiles(key, false, "plainText.txt");
-        FileAPI.DecryptFiles(key, false, "cipherText.txt");
+        //FileAPI.EncryptFiles("key.txt", true, "plainText.txt","MycipherText.txt");
+        //FileAPI.DecryptFiles("key.txt", true, "MycipherText.txt","MydecryptedText.txt");
+        //FileAPI.EncryptFiles(key, false, "plainText.txt");
+        //FileAPI.DecryptFiles(key, false, "cipherText.txt");
         /** Test image file ed crypt*/
         FileAPI.EncryptFiles("key.txt", true, "Histoie.jpg", "CipherHistoie.jpg");
         FileAPI.DecryptFiles("key.txt", true, "CipherHistoie.jpg", "DecryptedHistoie.jpg");
+        //String filepath="F:/工作区/编译原理 Tiny/源代码/yacc/Detiny.y";
+        //String outpath="F:/工作区/编译原理 Tiny/源代码/yacc/Entiny.y";
+        //FileAPI.DecryptFiles("key.txt", true, outpath, filepath);
     }
 }

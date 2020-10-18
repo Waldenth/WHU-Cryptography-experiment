@@ -1,11 +1,20 @@
 import javax.swing.ButtonGroup;
 import javax.swing.JButton;
+import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPasswordField;
 import javax.swing.JRadioButton;
+import javax.swing.JTextField;
+
+import AES.FileAPI;
+
 import java.awt.Font;
+import java.awt.event.ActionListener;
+import java.io.File;
+import java.awt.event.ActionEvent;
 
 public class GUItools {
     /** 窗体*/
@@ -24,6 +33,12 @@ public class GUItools {
     private JLabel title;
     private JLabel passwordTips;
     private JLabel chooseEnDeTips;
+    /** 路径文本框*/
+    public JTextField pathTips;
+
+    public String filePath="null";
+    public String fileName="null";
+    public int ENorDEorNochoose=0;
     
     /**
      * 重写构造方法
@@ -32,8 +47,8 @@ public class GUItools {
         jf=new JFrame("AES-128");
         jf.setLayout(null);
         jp1=new JPanel();jp2=new JPanel();jp3=new JPanel();
-        jrb1=new JRadioButton("加密");
-        jrb2=new JRadioButton("解密");
+        jrb1=new JRadioButton("加密");  //1
+        jrb2=new JRadioButton("解密");  //2
         EnDEchoose=new ButtonGroup();
         chooseFile=new JButton("选择文件");
         chooseFile.setFocusPainted(false);
@@ -43,7 +58,9 @@ public class GUItools {
         title=new JLabel("AES-128加解密工具");
         passwordTips=new JLabel("输入密码(16位)");
         chooseEnDeTips=new JLabel("选择类型");
+        pathTips=new JTextField();
         initGUI();
+        work();
     }
 
     /** 
@@ -70,9 +87,15 @@ public class GUItools {
         jp2.add(chooseFile);
         jp2.add(jrb1);jp2.add(jrb2);
         jp2.add(chooseEnDeTips);
+        jp2.add(pathTips);
         passwordTips.setBounds(40,10,150,30);
         password.setBounds(40,50,150,20);
         chooseFile.setBounds(40,100,100,40);
+        pathTips.setBounds(160,110,140,20);
+        pathTips.setVisible(true);
+        pathTips.setText("null");
+        pathTips.setEditable(true);
+
         EnDEchoose.add(jrb1);
         EnDEchoose.add(jrb2);
         jp2.add(jrb1);
@@ -96,9 +119,66 @@ public class GUItools {
         Font ChooseFileF=new Font("微软雅黑",Font.PLAIN,12);
         chooseFile.setFont(ChooseFileF);
         chooseEnDeTips.setFont(ChooseFileF);
+        start.setFont(ChooseFileF);
     }
 
-
+    /**
+     * 监听
+    */
+    public void work(){
+        chooseFile.addActionListener(new ActionListener(){
+            public void actionPerformed(ActionEvent event){
+                JFileChooser jfc=new JFileChooser();
+                jfc.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES );
+                jfc.showDialog(new JLabel(), "选择");
+                File file=jfc.getSelectedFile();
+                if(file.isFile()){
+                    filePath=file.getAbsolutePath();
+                    fileName=jfc.getSelectedFile().getName();
+                } 
+                filePath=filePath.replace("\\", "/");
+                //System.out.println(filePath); 
+                pathTips.setText(filePath);
+            }
+        });
+        start.addActionListener(new ActionListener(){
+            public void actionPerformed(ActionEvent event){
+                if(jrb1.isSelected())
+                    ENorDEorNochoose=1;
+                else if(jrb2.isSelected())
+                    ENorDEorNochoose=2;
+                if(ENorDEorNochoose==0){
+                    JOptionPane.showMessageDialog(null, "未选择处理类型", "错误", JOptionPane.ERROR_MESSAGE);
+                }
+                String key=new String(password.getPassword());
+                //System.out.println(key);
+                if(key.length()!=16){
+                    JOptionPane.showMessageDialog(null, "密码非16位", "错误",JOptionPane.ERROR_MESSAGE);
+                }
+                if(filePath.equals("null")){
+                    JOptionPane.showMessageDialog(null, "文件未指定", "错误",JOptionPane.ERROR_MESSAGE);
+                }
+                String outputPath="null";
+                if(ENorDEorNochoose==1)
+                    outputPath=filePath.substring(0,filePath.length()-fileName.length())+"Encrypted_"+fileName;
+                else if(ENorDEorNochoose==2)
+                    outputPath=filePath.substring(0,filePath.length()-fileName.length())+"Decrypted_"+fileName;
+                else
+                    JOptionPane.showMessageDialog(null, "未选择处理类型", "错误", JOptionPane.ERROR_MESSAGE);
+                //System.out.println(outputPath);
+                try {
+                    if(ENorDEorNochoose==1)
+                        FileAPI.EncryptFiles(key, false, filePath, outputPath);
+                    else if(ENorDEorNochoose==2)
+                        FileAPI.DecryptFiles(key, false, filePath, outputPath);
+                        JOptionPane.showMessageDialog(null, "文件处理成功", "提示", JOptionPane.INFORMATION_MESSAGE);
+                } catch (Exception e) {
+                    //TODO: handle exception
+                    JOptionPane.showMessageDialog(null, "文件处理异常", "错误", JOptionPane.ERROR_MESSAGE);
+                }
+            }
+        });
+    }
 
     /**
      * 启动
