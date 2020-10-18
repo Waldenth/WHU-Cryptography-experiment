@@ -1,7 +1,5 @@
 package AES;
 
-import java.io.File;
-
 import AES.decrypt.DECRYPT;
 import AES.encrypt.ENCRYPT;
 

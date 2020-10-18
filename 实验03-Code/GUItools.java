@@ -147,34 +147,44 @@ public class GUItools {
                     ENorDEorNochoose=1;
                 else if(jrb2.isSelected())
                     ENorDEorNochoose=2;
+                boolean isNormal=true;
                 if(ENorDEorNochoose==0){
+                    isNormal=false;
                     JOptionPane.showMessageDialog(null, "未选择处理类型", "错误", JOptionPane.ERROR_MESSAGE);
                 }
-                String key=new String(password.getPassword());
-                //System.out.println(key);
-                if(key.length()!=16){
-                    JOptionPane.showMessageDialog(null, "密码非16位", "错误",JOptionPane.ERROR_MESSAGE);
-                }
-                if(filePath.equals("null")){
-                    JOptionPane.showMessageDialog(null, "文件未指定", "错误",JOptionPane.ERROR_MESSAGE);
-                }
-                String outputPath="null";
-                if(ENorDEorNochoose==1)
-                    outputPath=filePath.substring(0,filePath.length()-fileName.length())+"Encrypted_"+fileName;
-                else if(ENorDEorNochoose==2)
-                    outputPath=filePath.substring(0,filePath.length()-fileName.length())+"Decrypted_"+fileName;
-                else
-                    JOptionPane.showMessageDialog(null, "未选择处理类型", "错误", JOptionPane.ERROR_MESSAGE);
-                //System.out.println(outputPath);
-                try {
-                    if(ENorDEorNochoose==1)
-                        FileAPI.EncryptFiles(key, false, filePath, outputPath);
-                    else if(ENorDEorNochoose==2)
-                        FileAPI.DecryptFiles(key, false, filePath, outputPath);
-                        JOptionPane.showMessageDialog(null, "文件处理成功", "提示", JOptionPane.INFORMATION_MESSAGE);
-                } catch (Exception e) {
-                    //TODO: handle exception
-                    JOptionPane.showMessageDialog(null, "文件处理异常", "错误", JOptionPane.ERROR_MESSAGE);
+                if(isNormal){
+                    String key=new String(password.getPassword());
+                    //System.out.println(key);
+                    if(key.length()!=16){
+                        isNormal=false;
+                        JOptionPane.showMessageDialog(null, "密码非16位", "错误",JOptionPane.ERROR_MESSAGE);
+                    }
+                    if(isNormal){
+                        if(filePath.equals("null")){
+                            isNormal=false;
+                            JOptionPane.showMessageDialog(null, "文件未指定", "错误",JOptionPane.ERROR_MESSAGE);
+                        }
+                        if(isNormal){
+                            String outputPath="null";
+                            if(ENorDEorNochoose==1)
+                                outputPath=filePath.substring(0,filePath.length()-fileName.length())+"Encrypted_"+fileName;
+                            else if(ENorDEorNochoose==2)
+                                outputPath=filePath.substring(0,filePath.length()-fileName.length())+"Decrypted_"+fileName;
+                            else
+                                JOptionPane.showMessageDialog(null, "未选择处理类型", "错误", JOptionPane.ERROR_MESSAGE);
+                            //System.out.println(outputPath);
+                            try {
+                                if(ENorDEorNochoose==1)
+                                    FileAPI.EncryptFiles(key, false, filePath, outputPath);
+                                else if(ENorDEorNochoose==2)
+                                    FileAPI.DecryptFiles(key, false, filePath, outputPath);
+                                JOptionPane.showMessageDialog(null, "文件处理成功", "提示", JOptionPane.INFORMATION_MESSAGE);
+                            } catch (Exception e) {
+                                //TODO: handle exception
+                                JOptionPane.showMessageDialog(null, "文件处理异常", "错误", JOptionPane.ERROR_MESSAGE);
+                            }
+                        }
+                    }
                 }
             }
         });
