@@ -11,6 +11,8 @@ import AES.encrypt.ENCRYPT;
 
 
 public class FileAPI {
+    protected static int progressNow=0;
+    protected static int fileLength=0;
     public static boolean EncryptFiles(String keydata,boolean isPath,String filePath,String...outputPaths){
         byte[]key=new byte[16];
         byte[]data;
@@ -27,10 +29,12 @@ public class FileAPI {
         
         try{
             data=readFile(filePath);
-            for(int i=0;i<data.length/16;i++){
-                tmp=ENCRYPT.encryptData(Arrays.copyOfRange(data,i*16, i*16+16), key);
-                System.arraycopy(tmp, 0, data, i*16, 16);
+            fileLength=data.length/16;
+            for(progressNow=0;progressNow<data.length/16;progressNow++){
+                tmp=ENCRYPT.encryptData(Arrays.copyOfRange(data,progressNow*16, progressNow*16+16), key);
+                System.arraycopy(tmp, 0, data, progressNow*16, 16);
             }
+            progressNow=0;
             System.out.println("+-----------------------+");
             System.out.println("|    Encrypt success!   |");
             System.out.println("+-----------------------+");
@@ -61,10 +65,12 @@ public class FileAPI {
 
         try{
             data=readFile(filePath);
-            for(int i=0;i<data.length/16;i++){
-                tmp=DECRYPT.decryptData(Arrays.copyOfRange(data,i*16,i*16+16 ), key);
-                System.arraycopy(tmp, 0, data, i*16, 16);
+            fileLength=data.length/16;
+            for(progressNow=0;progressNow<data.length/16;progressNow++){
+                tmp=DECRYPT.decryptData(Arrays.copyOfRange(data,progressNow*16,progressNow*16+16 ), key);
+                System.arraycopy(tmp, 0, data, progressNow*16, 16);
             }
+            progressNow=0;
             System.out.println("+-----------------------+");
             System.out.println("|    Decrypt success!   |");
             System.out.println("+-----------------------+");
@@ -99,5 +105,11 @@ public class FileAPI {
         System.out.println("\tYour output file path is "+filepath);
         output.close();
         return true;
+    }
+    public static int GetprogressNow(){
+        return progressNow;
+    }
+    public static int GetfileLength(){
+        return fileLength;
     }
 }

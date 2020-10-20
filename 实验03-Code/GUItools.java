@@ -10,7 +10,6 @@ import javax.swing.JRadioButton;
 import javax.swing.JTextField;
 
 import AES.FileAPI;
-
 import java.awt.Font;
 import java.awt.event.ActionListener;
 import java.io.File;
@@ -39,6 +38,7 @@ public class GUItools {
     public String filePath="null";
     public String fileName="null";
     public int ENorDEorNochoose=0;
+
     
     /**
      * 重写构造方法
@@ -174,13 +174,16 @@ public class GUItools {
                                 JOptionPane.showMessageDialog(null, "未选择处理类型", "错误", JOptionPane.ERROR_MESSAGE);
                             //System.out.println(outputPath);
                             try {
-                                if(ENorDEorNochoose==1)
+                                if(ENorDEorNochoose==1){
+                                    Tips.show(true);
                                     FileAPI.EncryptFiles(key, false, filePath, outputPath);
-                                else if(ENorDEorNochoose==2)
+                                }else if(ENorDEorNochoose==2){
+                                    Tips.show(false);
                                     FileAPI.DecryptFiles(key, false, filePath, outputPath);
+                                }
+                                Tips.off();
                                 JOptionPane.showMessageDialog(null, "文件处理成功", "提示", JOptionPane.INFORMATION_MESSAGE);
                             } catch (Exception e) {
-                                //TODO: handle exception
                                 JOptionPane.showMessageDialog(null, "文件处理异常", "错误", JOptionPane.ERROR_MESSAGE);
                             }
                         }
@@ -189,6 +192,24 @@ public class GUItools {
             }
         });
     }
+
+    public static class Tips{
+        static JFrame tip;
+        public static void show(boolean id){
+            if(id)
+                tip=new JFrame("正在加密中");
+            else
+                tip=new JFrame("正在解密中");
+            tip.setSize(250,50);
+            tip.setLocationRelativeTo(null);
+            tip.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+            tip.setVisible(true);
+        }
+        public static void off(){
+            tip.dispose();
+        }
+    }
+
 
     /**
      * 启动
