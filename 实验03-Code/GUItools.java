@@ -14,6 +14,8 @@ import AES.FileAPI;
 import java.awt.Font;
 import java.awt.event.ActionListener;
 import java.io.File;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.awt.event.ActionEvent;
 
 public class GUItools {
@@ -40,7 +42,8 @@ public class GUItools {
     public String fileName="null";
     public int ENorDEorNochoose=0;
 
-    public static boolean iscompleted=false;
+    public  volatile boolean iscompleted=false;
+    public  volatile boolean caninformUser=false;
 
     /**
      * 重写构造方法
@@ -193,7 +196,17 @@ public class GUItools {
                                         Decrypt de=new Decrypt(key, filePath, outputPath);                                        
                                         de.start();
                                         waitTip.start();
-                                    }
+                                    } 
+                                    Timer t=new Timer();
+                                    t.schedule(new TimerTask(){
+                                        public void run(){
+                                            if(caninformUser){
+                                                JOptionPane.showMessageDialog(null, "文件处理成功", "提示", JOptionPane.INFORMATION_MESSAGE); 
+                                                t.cancel();
+                                            }
+                                        }
+                                    },0,500);
+                                    caninformUser=false;
                                     iscompleted=false;
                                 }
                             }
@@ -209,8 +222,13 @@ public class GUItools {
             waitingTips tip=new waitingTips();
             tip.InitEncryptShow();
             tip.show();
-            
-          
+            while(true){
+                if(iscompleted)
+                    break;
+            }
+            tip.turnOff();  
+            caninformUser=true;
+            System.out.println("Now can inform user");
         }
     }
 
@@ -219,6 +237,13 @@ public class GUItools {
             waitingTips tip=new waitingTips();
             tip.InitDecryptShow();
             tip.show();
+            while(true){
+                if(iscompleted)
+                    break;
+            }
+            tip.turnOff();
+            caninformUser=true;
+            System.out.println("Now can inform user");
         }
     }
 
@@ -233,7 +258,7 @@ public class GUItools {
         public void run(){
             FileAPI.EncryptFiles(key, false, filePath, outputPath);
             iscompleted=true;
-            System.out.println("-----------"+iscompleted);
+            //System.out.println("-----------"+iscompleted+"-------------"); 
         }
     }
 
