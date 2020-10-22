@@ -10,6 +10,7 @@ import javax.swing.JRadioButton;
 import javax.swing.JTextField;
 
 import AES.FileAPI;
+
 import java.awt.Font;
 import java.awt.event.ActionListener;
 import java.io.File;
@@ -39,7 +40,8 @@ public class GUItools {
     public String fileName="null";
     public int ENorDEorNochoose=0;
 
-    
+    public static boolean iscompleted=false;
+
     /**
      * 重写构造方法
     */
@@ -59,6 +61,7 @@ public class GUItools {
         passwordTips=new JLabel("输入密码(16位)");
         chooseEnDeTips=new JLabel("选择类型");
         pathTips=new JTextField();
+
         initGUI();
         work();
     }
@@ -128,63 +131,71 @@ public class GUItools {
     public void work(){
         chooseFile.addActionListener(new ActionListener(){
             public void actionPerformed(ActionEvent event){
-                JFileChooser jfc=new JFileChooser();
-                jfc.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES );
-                jfc.showDialog(new JLabel(), "选择");
-                File file=jfc.getSelectedFile();
-                if(file.isFile()){
-                    filePath=file.getAbsolutePath();
-                    fileName=jfc.getSelectedFile().getName();
-                } 
-                filePath=filePath.replace("\\", "/");
-                //System.out.println(filePath); 
-                pathTips.setText(filePath);
+                String str=event.getActionCommand();
+                if(str.equals("选择文件")){
+                    JFileChooser jfc=new JFileChooser();
+                    jfc.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES );
+                    jfc.showDialog(new JLabel(), "选择");
+                    File file=jfc.getSelectedFile();
+                    if(file.isFile()){
+                        filePath=file.getAbsolutePath();
+                        fileName=jfc.getSelectedFile().getName();
+                    } 
+                    filePath=filePath.replace("\\", "/");
+                    //System.out.println(filePath); 
+                    pathTips.setText(filePath);
+                }
             }
         });
         start.addActionListener(new ActionListener(){
             public void actionPerformed(ActionEvent event){
-                if(jrb1.isSelected())
-                    ENorDEorNochoose=1;
-                else if(jrb2.isSelected())
-                    ENorDEorNochoose=2;
-                boolean isNormal=true;
-                if(ENorDEorNochoose==0){
-                    isNormal=false;
-                    JOptionPane.showMessageDialog(null, "未选择处理类型", "错误", JOptionPane.ERROR_MESSAGE);
-                }
-                if(isNormal){
-                    String key=new String(password.getPassword());
-                    //System.out.println(key);
-                    if(key.length()!=16){
+                String str=event.getActionCommand();
+                if(str.equals("开始")){
+                    if(jrb1.isSelected())
+                        ENorDEorNochoose=1;
+                    else if(jrb2.isSelected())
+                        ENorDEorNochoose=2;
+                    boolean isNormal=true;
+                    if(ENorDEorNochoose==0){
                         isNormal=false;
-                        JOptionPane.showMessageDialog(null, "密码非16位", "错误",JOptionPane.ERROR_MESSAGE);
+                        JOptionPane.showMessageDialog(null, "未选择处理类型", "错误", JOptionPane.ERROR_MESSAGE);
                     }
                     if(isNormal){
-                        if(filePath.equals("null")){
+                        String key=new String(password.getPassword());
+                        //System.out.println(key);
+                        if(key.length()!=16){
                             isNormal=false;
-                            JOptionPane.showMessageDialog(null, "文件未指定", "错误",JOptionPane.ERROR_MESSAGE);
+                            JOptionPane.showMessageDialog(null, "密码非16位", "错误",JOptionPane.ERROR_MESSAGE);
                         }
                         if(isNormal){
-                            String outputPath="null";
-                            if(ENorDEorNochoose==1)
-                                outputPath=filePath.substring(0,filePath.length()-fileName.length())+"Encrypted_"+fileName;
-                            else if(ENorDEorNochoose==2)
-                                outputPath=filePath.substring(0,filePath.length()-fileName.length())+"Decrypted_"+fileName;
-                            else
-                                JOptionPane.showMessageDialog(null, "未选择处理类型", "错误", JOptionPane.ERROR_MESSAGE);
-                            //System.out.println(outputPath);
-                            try {
-                                if(ENorDEorNochoose==1){
-                                    Tips.show(true);
-                                    FileAPI.EncryptFiles(key, false, filePath, outputPath);
-                                }else if(ENorDEorNochoose==2){
-                                    Tips.show(false);
-                                    FileAPI.DecryptFiles(key, false, filePath, outputPath);
+                            if(filePath.equals("null")){
+                                isNormal=false;
+                                JOptionPane.showMessageDialog(null, "文件未指定", "错误",JOptionPane.ERROR_MESSAGE);
+                            }
+                            if(isNormal){
+                                String outputPath="null";
+                                if(ENorDEorNochoose==1)
+                                    outputPath=filePath.substring(0,filePath.length()-fileName.length())+"Encrypted_"+fileName;
+                                else if(ENorDEorNochoose==2)
+                                    outputPath=filePath.substring(0,filePath.length()-fileName.length())+"Decrypted_"+fileName;
+                                else{
+                                    JOptionPane.showMessageDialog(null, "未选择处理类型", "错误", JOptionPane.ERROR_MESSAGE);
+                                    isNormal=false;
                                 }
-                                Tips.off();
-                                JOptionPane.showMessageDialog(null, "文件处理成功", "提示", JOptionPane.INFORMATION_MESSAGE);
-                            } catch (Exception e) {
-                                JOptionPane.showMessageDialog(null, "文件处理异常", "错误", JOptionPane.ERROR_MESSAGE);
+                                if(isNormal){
+                                    if(ENorDEorNochoose==1){
+                                        TipEn waitTip=new TipEn();
+                                        Encrypt en=new Encrypt(key, filePath, outputPath);
+                                        en.start();
+                                        waitTip.start();
+                                    }else{
+                                        TipDe waitTip=new TipDe();
+                                        Decrypt de=new Decrypt(key, filePath, outputPath);                                        
+                                        de.start();
+                                        waitTip.start();
+                                    }
+                                    iscompleted=false;
+                                }
                             }
                         }
                     }
@@ -193,22 +204,52 @@ public class GUItools {
         });
     }
 
-    public static class Tips{
-        static JFrame tip;
-        public static void show(boolean id){
-            if(id)
-                tip=new JFrame("正在加密中");
-            else
-                tip=new JFrame("正在解密中");
-            tip.setSize(250,50);
-            tip.setLocationRelativeTo(null);
-            tip.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-            tip.setVisible(true);
-        }
-        public static void off(){
-            tip.dispose();
+    class TipEn extends Thread{
+        public void run(){
+            waitingTips tip=new waitingTips();
+            tip.InitEncryptShow();
+            tip.show();
+            
+          
         }
     }
+
+    class TipDe extends Thread{
+        public void run(){
+            waitingTips tip=new waitingTips();
+            tip.InitDecryptShow();
+            tip.show();
+        }
+    }
+
+
+    class Encrypt extends Thread{
+        String key;String filePath;String outputPath;
+        public Encrypt(String k,String f,String o){
+            key=k;
+            filePath=f;
+            outputPath=o;
+        }
+        public void run(){
+            FileAPI.EncryptFiles(key, false, filePath, outputPath);
+            iscompleted=true;
+            System.out.println("-----------"+iscompleted);
+        }
+    }
+
+    class Decrypt extends Thread{
+        String key;String filePath;String outputPath;
+        public Decrypt(String k,String f,String o){
+            key=k;
+            filePath=f;
+            outputPath=o;
+        }
+        public void run(){
+            FileAPI.DecryptFiles(key, false, filePath, outputPath);
+            iscompleted=true;
+        }
+    }
+
 
 
     /**

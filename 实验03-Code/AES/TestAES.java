@@ -22,4 +22,8 @@ public class TestAES {
         //String outpath="F:/工作区/编译原理 Tiny/源代码/yacc/Entiny.y";
         //FileAPI.DecryptFiles("key.txt", true, outpath, filepath);
     }
+    public static void test(){
+        FileAPI.EncryptFiles("key.txt", true, "Histoie.jpg", "CipherHistoie.jpg");
+        FileAPI.DecryptFiles("key.txt", true, "CipherHistoie.jpg", "DecryptedHistoie.jpg");
+    }
 }
