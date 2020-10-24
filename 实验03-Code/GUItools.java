@@ -197,6 +197,7 @@ public class GUItools {
                                         de.start();
                                         waitTip.start();
                                     } 
+
                                     Timer t=new Timer();
                                     t.schedule(new TimerTask(){
                                         public void run(){

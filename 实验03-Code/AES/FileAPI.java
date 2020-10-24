@@ -13,7 +13,9 @@ import AES.encrypt.ENCRYPT;
 public class FileAPI {
     protected static int progressNow=0;
     protected static int fileLength=0;
+    public static volatile boolean alreadyread=false;
     public static boolean EncryptFiles(String keydata,boolean isPath,String filePath,String...outputPaths){
+        progressNow=0;
         byte[]key=new byte[16];
         byte[]data;
         byte[]tmp=new byte[16];
@@ -29,12 +31,13 @@ public class FileAPI {
         
         try{
             data=readFile(filePath);
+            System.out.println("file has already been read in memory");
             fileLength=data.length/16;
+            alreadyread=true;
             for(progressNow=0;progressNow<data.length/16;progressNow++){
                 tmp=ENCRYPT.encryptData(Arrays.copyOfRange(data,progressNow*16, progressNow*16+16), key);
                 System.arraycopy(tmp, 0, data, progressNow*16, 16);
             }
-            progressNow=0;
             System.out.println("+-----------------------+");
             System.out.println("|    Encrypt success!   |");
             System.out.println("+-----------------------+");
@@ -46,10 +49,12 @@ public class FileAPI {
         }catch(IOException e){
             e.printStackTrace();
         }
+        alreadyread=false;
         return true;
     }
 
     public static boolean DecryptFiles(String keydata,boolean isPath,String filePath,String...outputPaths){
+        progressNow=0;
         byte[]key=new byte[16];
         byte[]data;
         byte[]tmp=new byte[16];
@@ -65,12 +70,14 @@ public class FileAPI {
 
         try{
             data=readFile(filePath);
+            System.out.println("file has already been read in memory");
             fileLength=data.length/16;
+            alreadyread=true;
             for(progressNow=0;progressNow<data.length/16;progressNow++){
                 tmp=DECRYPT.decryptData(Arrays.copyOfRange(data,progressNow*16,progressNow*16+16 ), key);
                 System.arraycopy(tmp, 0, data, progressNow*16, 16);
             }
-            progressNow=0;
+            //progressNow=0;
             System.out.println("+-----------------------+");
             System.out.println("|    Decrypt success!   |");
             System.out.println("+-----------------------+");
@@ -82,6 +89,7 @@ public class FileAPI {
         }catch(IOException e){
             e.printStackTrace();
         }
+        alreadyread=false;
         return true;
     }
 
