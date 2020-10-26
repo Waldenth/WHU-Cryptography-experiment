@@ -97,9 +97,14 @@ public class FileAPI {
         File file=new File(filepath);
         FileInputStream input=new FileInputStream(file);
         byte[] getData=new byte[(int)file.length()];
+        
+        //尝试使用一次读取方法
+        input.read(getData);
+        /**  逐个字节读取效率太低,废弃
         for(int i=0;i<getData.length;i++){
             getData[i]=(byte)(input).read();
         }
+        */
         input.close();
         return getData;
     } 

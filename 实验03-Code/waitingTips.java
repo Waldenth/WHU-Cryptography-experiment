@@ -59,7 +59,7 @@ public class waitingTips{
                         int current;
                         public void run(){
                             current=FileAPI.GetprogressNow();
-                            System.out.println("cur="+current+" total="+fileLength);
+                            //System.out.println("cur="+current+" total="+fileLength);
                             if(fileLength-current<=10){
                                 t2.cancel();
                             }else{
