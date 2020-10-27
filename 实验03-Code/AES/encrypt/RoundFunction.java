@@ -96,7 +96,9 @@ public class RoundFunction {
                 ans=Xtime.xtimeTable[high][low];
                 break;
             case 0x3:
-                ans=(byte)(input2^Xtime.xtimeTable[high][low]);
+                // 测试使用直接表
+                //ans=(byte)(input2^Xtime.xtimeTable[high][low]);
+                ans=Xtime.x3timeTable[high][low];
                 break;
             default:
                 System.out.println("Error: can not calcullate in GF(2^8)");

@@ -81,6 +81,7 @@ public class Inv_RoundFunction {
         byte ans=0;
         int high=(input2>>>4)&(0b00001111);
         int low=(input2)&(0b00001111);
+        // 更新,使用直接表,测试加速
         switch (input1){
             case 0x1:
                 ans=input2;
@@ -89,27 +90,33 @@ public class Inv_RoundFunction {
                 ans=Xtime.xtimeTable[high][low];
                 break;
             case 0x3:
-                ans=(byte)(input2^Xtime.xtimeTable[high][low]);
+                //ans=(byte)(input2^Xtime.xtimeTable[high][low]);
+                ans=Xtime.x3timeTable[high][low];
                 break;
             case 0x04:
                 ans=GFtime((byte)0x02, GFtime((byte)0x02, input2));
                 //(byte)(GFtime((byte)0x02, input2)^GFtime((byte)0x02, input2));
                 break;
             case 0x08:
-                ans=GFtime((byte)0x02,GFtime((byte)0x02, GFtime((byte)0x02, input2)));
+                //ans=GFtime((byte)0x02,GFtime((byte)0x02, GFtime((byte)0x02, input2)));
+                ans=Xtime.x8timeTable[high][low];
                 break;
             case 0x09:
-                ans=(byte)(GFtime((byte)0x08, input2)^input2);
+                //ans=(byte)(GFtime((byte)0x08, input2)^input2);
+                ans=Xtime.x9timeTable[high][low];
                 //(byte)(GFtime((byte)0x02,GFtime((byte)0x02, GFtime((byte)0x02, input2)))^input2);
                 break;
             case 0x0b:
-                ans=(byte)(GFtime((byte)0x08, input2)^GFtime((byte)0x03, input2));
+                //ans=(byte)(GFtime((byte)0x08, input2)^GFtime((byte)0x03, input2));
+                ans=Xtime.x0BtimeTable[high][low];
                 break;
             case 0x0d:
-                ans=(byte)(GFtime((byte)0x08, input2)^GFtime((byte)0x04, input2)^input2);
+                //ans=(byte)(GFtime((byte)0x08, input2)^GFtime((byte)0x04, input2)^input2);
+                ans=Xtime.x0DtimeTable[high][low];
                 break;
             case 0x0e:
-                ans=(byte)(GFtime((byte)0x08, input2)^GFtime((byte)0x04, input2)^GFtime((byte)0x02, input2));
+                //ans=(byte)(GFtime((byte)0x08, input2)^GFtime((byte)0x04, input2)^GFtime((byte)0x02, input2));
+                ans=Xtime.x0EtimeTable[high][low];
                 break;
             default:
                 System.out.println("Error: can not calcullate in GF(2^8)");
