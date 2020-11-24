@@ -1,3 +1,12 @@
+package encryptFileGUI;
+
+import java.awt.Font;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.io.File;
+import java.util.Timer;
+import java.util.TimerTask;
+
 import javax.swing.ButtonGroup;
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
@@ -9,14 +18,7 @@ import javax.swing.JPasswordField;
 import javax.swing.JRadioButton;
 import javax.swing.JTextField;
 
-import AES.FileAPI;
-
-import java.awt.Font;
-import java.awt.event.ActionListener;
-import java.io.File;
-import java.util.Timer;
-import java.util.TimerTask;
-import java.awt.event.ActionEvent;
+import encryptTools.aes.FileAPI;
 
 public class GUItools {
     /** 窗体*/
@@ -239,7 +241,7 @@ public class GUItools {
 
     class TipEn extends Thread{
         public void run(){
-            waitingTips tip=new waitingTips();
+            WaitingTips tip=new WaitingTips();
             tip.InitEncryptShow();
             tip.show();
             while(true){
@@ -254,7 +256,7 @@ public class GUItools {
 
     class TipDe extends Thread{
         public void run(){
-            waitingTips tip=new waitingTips();
+            WaitingTips tip=new WaitingTips();
             tip.InitDecryptShow();
             tip.show();
             while(true){
