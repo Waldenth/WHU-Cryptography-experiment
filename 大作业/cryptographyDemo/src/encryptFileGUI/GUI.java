@@ -7,8 +7,4 @@ public class GUI {
 	public static void main(String[]args) {
 		mywindow.setVisible(true);
 	}
-	public void work() {
-		
-	}
-
 }

@@ -6,13 +6,21 @@ import java.awt.EventQueue;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
+
+import encryptFileGUI.GUItools.Encrypt;
+import encryptTools.aes.FileAPI;
+
 import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Alignment;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import javax.swing.SwingConstants;
 import javax.swing.JRadioButton;
@@ -26,8 +34,12 @@ import javax.swing.JTextField;
 
 public class GUIFrame extends JFrame {
 
-	public String filePath;
-	public String fileName;
+	public String filePath="null";
+	public String fileName="null";
+	public int ENorDEorNochoose=0; //加密1解密2, 0为未选择
+    public  volatile boolean iscompleted=false;
+    public  volatile boolean caninformUser=false;
+    
 	private JPanel contentPane;
 	private final ButtonGroup buttonGroup = new ButtonGroup();
 	private JPasswordField password;
@@ -143,9 +155,87 @@ public class GUIFrame extends JFrame {
 		startButton.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent event) {
-				// TODO 自动生成的方法存根
-				System.out.println(filePath);
-				
+				 String str=event.getActionCommand();
+	                if(str.equals("开   始")){
+	                    if(ENFileButton.isSelected())
+	                        ENorDEorNochoose=1;
+	                    else if(DEFileButton.isSelected())
+	                        ENorDEorNochoose=2;
+	                    boolean isNormal=true;
+	                    if(ENorDEorNochoose==0){
+	                        isNormal=false;
+	                        JOptionPane.showMessageDialog(null, "未选择处理类型", "错误", JOptionPane.ERROR_MESSAGE);
+	                    }
+	                    if(isNormal){
+	                        String key=new String(password.getPassword());
+	                        //System.out.println(key);
+	                        if(key.length()!=16){
+	                            if(key.length()<5){
+	                                isNormal=false;
+	                                JOptionPane.showMessageDialog(null, "密码过短", "错误",JOptionPane.ERROR_MESSAGE);
+	                            }else if(key.length()>16){
+	                                isNormal=false;
+	                                JOptionPane.showMessageDialog(null, "密码过长", "错误",JOptionPane.ERROR_MESSAGE);
+	                            }else{
+	                                int needAddlength=16-key.length();
+	                                if(needAddlength<=key.length()){
+	                                    key=key.concat(key.substring(0,needAddlength));
+	                                }else{
+	                                    String tmpKey=new String(password.getPassword());
+	                                    int needAddStrNum=needAddlength/tmpKey.length();
+	                                    for(int i=0;i<needAddStrNum;i++){
+	                                        key=key.concat(tmpKey);
+	                                    }
+	                                    needAddlength=16-key.length();
+	                                    key=key.concat(key.substring( 0,needAddlength));
+	                                }
+	                            }
+	                            
+	                        }
+	                        if(isNormal){
+	                            if(filePath.equals("null")){
+	                                isNormal=false;
+	                                JOptionPane.showMessageDialog(null, "文件未指定", "错误",JOptionPane.ERROR_MESSAGE);
+	                            }
+	                            if(isNormal){
+	                                String outputPath="null";
+	                                if(ENorDEorNochoose==1)
+	                                    outputPath=filePath.substring(0,filePath.length()-fileName.length())+"Encrypted_"+fileName;
+	                                else if(ENorDEorNochoose==2)
+	                                    outputPath=filePath.substring(0,filePath.length()-fileName.length())+"Decrypted_"+fileName;
+	                                else{
+	                                    JOptionPane.showMessageDialog(null, "未选择处理类型", "错误", JOptionPane.ERROR_MESSAGE);
+	                                    isNormal=false;
+	                                }
+	                                if(isNormal){
+	                                    if(ENorDEorNochoose==1){
+	                                        TipEn waitTip=new TipEn();
+	                                        Encrypt en=new Encrypt(key, filePath, outputPath);
+	                                        en.start();
+	                                        waitTip.start();
+	                                    }else{
+	                                        TipDe waitTip=new TipDe();
+	                                        Decrypt de=new Decrypt(key, filePath, outputPath);                                        
+	                                        de.start();
+	                                        waitTip.start();
+	                                    } 
+
+	                                    Timer t=new Timer();
+	                                    t.schedule(new TimerTask(){
+	                                        public void run(){
+	                                            if(caninformUser){
+	                                                JOptionPane.showMessageDialog(null, "文件处理成功", "提示", JOptionPane.INFORMATION_MESSAGE); 
+	                                                t.cancel();
+	                                            }
+	                                        }
+	                                    },0,500);
+	                                    caninformUser=false;
+	                                    iscompleted=false;
+	                                }
+	                            }
+	                        }
+	                    }
+	                }
 			}
 		});
 		
@@ -244,4 +334,62 @@ public class GUIFrame extends JFrame {
 		contentPane.setLayout(gl_contentPane);
 		
 	}
+	
+	class TipEn extends Thread{
+        public void run(){
+            WaitingTips tip=new WaitingTips();
+            tip.InitEncryptShow();
+            tip.show();
+            while(true){
+                if(iscompleted)
+                    break;
+            }
+            tip.turnOff();  
+            caninformUser=true;
+            System.out.println("Now can inform user");
+        }
+    }
+	
+    class TipDe extends Thread{
+        public void run(){
+            WaitingTips tip=new WaitingTips();
+            tip.InitDecryptShow();
+            tip.show();
+            while(true){
+                if(iscompleted)
+                    break;
+            }
+            tip.turnOff();
+            caninformUser=true;
+            System.out.println("Now can inform user");
+        }
+    }
+
+
+    class Encrypt extends Thread{
+        String key;String filePath;String outputPath;
+        public Encrypt(String k,String f,String o){
+            key=k;
+            filePath=f;
+            outputPath=o;
+        }
+        public void run(){
+            FileAPI.EncryptFiles(key, false, filePath, outputPath);
+            iscompleted=true;
+            //System.out.println("-----------"+iscompleted+"-------------"); 
+        }
+    }
+
+    class Decrypt extends Thread{
+        String key;String filePath;String outputPath;
+        public Decrypt(String k,String f,String o){
+            key=k;
+            filePath=f;
+            outputPath=o;
+        }
+        public void run(){
+            FileAPI.DecryptFiles(key, false, filePath, outputPath);
+            iscompleted=true;
+        }
+    }
 }
