@@ -7,8 +7,10 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 
-import encryptFileGUI.GUItools.Encrypt;
-import encryptTools.aes.FileAPI;
+import encryptTools.FileProcessingAPI;
+
+//import encryptFileGUI.GUItools.Encrypt;
+//import encryptTools.aes.FileAPI;
 
 import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Alignment;
@@ -39,6 +41,7 @@ public class GUIFrame extends JFrame {
 	public int ENorDEorNochoose=0; //加密1解密2, 0为未选择
     public  volatile boolean iscompleted=false;
     public  volatile boolean caninformUser=false;
+    public String HandleType="null";
     
 	private JPanel contentPane;
 	private final ButtonGroup buttonGroup = new ButtonGroup();
@@ -161,13 +164,24 @@ public class GUIFrame extends JFrame {
 	                        ENorDEorNochoose=1;
 	                    else if(DEFileButton.isSelected())
 	                        ENorDEorNochoose=2;
+	                    if(AES128button.isSelected())
+	                    	HandleType="AES-128";
+	                    else if(AES256button.isSelected())
+	                    	HandleType="AES-256";
+	                    else if(RC4button.isSelected())
+	                    	HandleType="RC4";
+	                    else if(DESbutton.isSelected())
+	                    	HandleType="DES";
 	                    boolean isNormal=true;
 	                    if(ENorDEorNochoose==0){
 	                        isNormal=false;
 	                        JOptionPane.showMessageDialog(null, "未选择处理类型", "错误", JOptionPane.ERROR_MESSAGE);
 	                    }
 	                    if(isNormal){
-	                        String key=new String(password.getPassword());
+	                    	 if(HandleType.equals("null")) {
+	 	                    	JOptionPane.showMessageDialog(null, "未选择加密类型\n将使用默认的AES-128处理","警告",JOptionPane.WARNING_MESSAGE);
+	 	                    }
+	                    	String key=new String(password.getPassword());
 	                        //System.out.println(key);
 	                        if(key.length()!=16){
 	                            if(key.length()<5){
@@ -210,14 +224,16 @@ public class GUIFrame extends JFrame {
 	                                if(isNormal){
 	                                    if(ENorDEorNochoose==1){
 	                                        TipEn waitTip=new TipEn();
-	                                        Encrypt en=new Encrypt(key, filePath, outputPath);
-	                                        en.start();
+	                                        Encrypt en=new Encrypt(key, filePath, outputPath,HandleType);
+	                                        waitTip.setPriority(Thread.MAX_PRIORITY);
 	                                        waitTip.start();
+	                                        en.start();
 	                                    }else{
 	                                        TipDe waitTip=new TipDe();
-	                                        Decrypt de=new Decrypt(key, filePath, outputPath);                                        
-	                                        de.start();
+	                                        Decrypt de=new Decrypt(key, filePath, outputPath,HandleType);                                        
+	                                        waitTip.setPriority(Thread.MAX_PRIORITY);
 	                                        waitTip.start();
+	                                        de.start();
 	                                    } 
 
 	                                    Timer t=new Timer();
@@ -367,29 +383,33 @@ public class GUIFrame extends JFrame {
 
 
     class Encrypt extends Thread{
-        String key;String filePath;String outputPath;
-        public Encrypt(String k,String f,String o){
+        String key;String filePath;String outputPath;String type;
+        public Encrypt(String k,String f,String o,String type){
             key=k;
             filePath=f;
             outputPath=o;
+            this.type=type;
         }
         public void run(){
-            FileAPI.EncryptFiles(key, false, filePath, outputPath);
-            iscompleted=true;
+            //FileAPI.EncryptFiles(key, false, filePath, outputPath);
+            FileProcessingAPI.EncryptFile(key, filePath, outputPath, type);
+        	iscompleted=true;
             //System.out.println("-----------"+iscompleted+"-------------"); 
         }
     }
 
     class Decrypt extends Thread{
-        String key;String filePath;String outputPath;
-        public Decrypt(String k,String f,String o){
+        String key;String filePath;String outputPath;String type;
+        public Decrypt(String k,String f,String o,String type){
             key=k;
             filePath=f;
             outputPath=o;
+            this.type=type;
         }
         public void run(){
-            FileAPI.DecryptFiles(key, false, filePath, outputPath);
-            iscompleted=true;
+            //FileAPI.DecryptFiles(key, false, filePath, outputPath);
+            FileProcessingAPI.DecryptFile(key, filePath, outputPath, type);
+        	iscompleted=true;
         }
     }
 }

@@ -8,7 +8,9 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JProgressBar;
 
-import encryptTools.aes.FileAPI;
+import encryptTools.FileProcessingAPI;
+
+//import encryptTools.aes.FileAPI;
 
 public class WaitingTips{
     JFrame jf=new JFrame("请稍后");
@@ -29,8 +31,8 @@ public class WaitingTips{
         Timer t=new Timer();
         t.schedule(new TimerTask(){
             public void run(){
-                if(FileAPI.alreadyread){
-                    fileLength=FileAPI.GetfileLength();
+                if(FileProcessingAPI.alreadyread){
+                    fileLength=FileProcessingAPI.GetfileLength();
                     System.out.println("length="+fileLength);
                     progress.setMaximum(fileLength);
                     canShow=true;
@@ -58,7 +60,7 @@ public class WaitingTips{
                     t2.schedule(new TimerTask(){
                         int current;
                         public void run(){
-                            current=FileAPI.GetprogressNow();
+                            current=FileProcessingAPI.GetprogressNow();
                             //System.out.println("cur="+current+" total="+fileLength);
                             if(fileLength-current<=10){
                                 t2.cancel();
@@ -86,8 +88,8 @@ public class WaitingTips{
         Timer t=new Timer();
         t.schedule(new TimerTask(){
             public void run(){
-                if(FileAPI.alreadyread){
-                    fileLength=FileAPI.GetfileLength();
+                if(FileProcessingAPI.alreadyread){
+                    fileLength=FileProcessingAPI.GetfileLength();
                     System.out.println("length="+fileLength);
                     progress.setMaximum(fileLength);
                     canShow=true;
