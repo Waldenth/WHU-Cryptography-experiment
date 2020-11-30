@@ -5,6 +5,8 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.util.Arrays;
 
+
+
 public class FileProcessingAPI {
 	protected static volatile int progressNow=0;
     protected static int fileLength=0;
@@ -13,9 +15,57 @@ public class FileProcessingAPI {
     public static boolean EncryptFile(String keyStr,String filePath,String outputPath,String type){
     	progressNow=0;
     	if(type.equals("DES")) {
+    		progressNow=0;
+    		byte[]key=keyStr.getBytes();
+    		byte[]bitKey=new byte[64];
+    		// GUI限制了最多8字节密码,不会溢出
+    		//System.out.println(keyStr);
+    		//System.out.println("key length = "+key.length);
+    		for(int i=0;i<key.length;i++) {
+    			String tmpString=Integer.toBinaryString(key[i]);
+    			if(tmpString.length()<8){
+                    int curLength=tmpString.length();
+                    for(int j=0;j<8-curLength;j++)
+                        tmpString="0"+tmpString;
+                }else if(tmpString.length()>8){
+                    tmpString=tmpString.substring(tmpString.length()-8);
+                }
+    			for(int k=0;k<tmpString.length();k++) {
+    				bitKey[8*i+k]=(byte)(tmpString.charAt(k)-'0');
+    			}
+    		}
+    		for(int curLength=8*key.length;curLength<64;curLength++) {
+    			bitKey[curLength]=bitKey[(curLength)%(8*key.length)];
+    		}//密码64比特转换结束
+    		
+    		byte[]data=readFile(filePath, false);
+    		fileLength=data.length/64; //DES一个文件长度64bit
+    		int fileByteLength=data.length/8;
+    		int fileBitLength=data.length;
+    		
+    		System.out.println("BitLength="+fileBitLength);
+    		
+    		alreadyread=true;
+    		
+    		byte[]outputData=new byte[fileByteLength];
+    		for(progressNow=0;progressNow<fileLength;progressNow++) {
+    			byte[]tmpTextBit=encryptTools.des.encrypt.DECRYPT_des.decryptData(Arrays.copyOfRange(data,progressNow*64,progressNow*64+64), bitKey);
+    			//System.arraycopy(tmpText,0,data, progressNow*64, 64);
+    			byte[]tmpTextByte=ConvertBitToByte(tmpTextBit);
+    			System.arraycopy(tmpTextByte, 0, outputData, progressNow*8, 8);
+    		}
+    		byte[]remain=new byte[fileBitLength-fileLength*64];
+    		
+    		System.arraycopy(data, fileLength*64, remain, 0, fileBitLength-fileLength*64);
     		
     		
+    		byte[]remainBytes=ConvertBitToByte(remain);
     		
+    		System.arraycopy(remainBytes, 0, outputData,fileLength*8 , fileByteLength-fileLength*8);
+    		
+    		
+    		writeFile(outputPath, outputData, true);
+    		alreadyread=false;
     		
     	}else if(type.equals("RC4")) {
     		progressNow=0;
@@ -34,10 +84,23 @@ public class FileProcessingAPI {
     		alreadyread=false;
     		
     	}else if(type.equals("AES-256")) {
-    		
-    		
-    		
-    		
+    		// NeedFix
+    		// 暂未实现,现用AES-128代替
+    		progressNow=0;
+            byte[]key=keyStr.getBytes();
+            
+            byte[]data=readFile(filePath, true);
+            fileLength=data.length/16;
+            alreadyread=true;
+            
+            byte[]tmp=new byte[16];
+            for(progressNow=0;progressNow<data.length/16;progressNow++){
+                tmp=encryptTools.aes.encrypt.ENCRYPT.encryptData(Arrays.copyOfRange(data,progressNow*16, progressNow*16+16), key);
+                System.arraycopy(tmp, 0, data, progressNow*16, 16);
+            }
+            writeFile(outputPath, data, true);
+            alreadyread=false;
+
     	}else {//AES-128
     		progressNow=0;
             byte[]key=keyStr.getBytes();
@@ -59,10 +122,58 @@ public class FileProcessingAPI {
     public static boolean DecryptFile(String keyStr,String filePath,String outputPath,String type) {
     	progressNow=0;
     	if(type.equals("DES")) {
+    		progressNow=0;
+    		byte[]key=keyStr.getBytes();
+    		byte[]bitKey=new byte[64];
+    		// GUI限制了最多8字节密码,不会溢出
+    		//System.out.println(keyStr);
+    		//System.out.println("key length = "+key.length);
+    		for(int i=0;i<key.length;i++) {
+    			String tmpString=Integer.toBinaryString(key[i]);
+    			if(tmpString.length()<8){
+                    int curLength=tmpString.length();
+                    for(int j=0;j<8-curLength;j++)
+                        tmpString="0"+tmpString;
+                }else if(tmpString.length()>8){
+                    tmpString=tmpString.substring(tmpString.length()-8);
+                }
+    			for(int k=0;k<tmpString.length();k++) {
+    				bitKey[8*i+k]=(byte)(tmpString.charAt(k)-'0');
+    			}
+    		}
+    		for(int curLength=8*key.length;curLength<64;curLength++) {
+    			bitKey[curLength]=bitKey[(curLength)%(8*key.length)];
+    		}//密码64比特转换结束
+    		
+    		byte[]data=readFile(filePath, false);
+    		fileLength=data.length/64; //DES一个文件长度64bit
+    		int fileByteLength=data.length/8;
+    		int fileBitLength=data.length;
+    		
+    		System.out.println("BitLength="+fileBitLength);
+    		
+    		alreadyread=true;
+    		
+    		byte[]outputData=new byte[fileByteLength];
+    		for(progressNow=0;progressNow<fileLength;progressNow++) {
+    			byte[]tmpTextBit=encryptTools.des.encrypt.DECRYPT_des.decryptData(Arrays.copyOfRange(data,progressNow*64,progressNow*64+64), bitKey);
+    			//System.arraycopy(tmpText,0,data, progressNow*64, 64);
+    			byte[]tmpTextByte=ConvertBitToByte(tmpTextBit);
+    			System.arraycopy(tmpTextByte, 0, outputData, progressNow*8, 8);
+    		}
+    		byte[]remain=new byte[fileBitLength-fileLength*64];
+    		
+    		System.arraycopy(data, fileLength*64, remain, 0, fileBitLength-fileLength*64);
     		
     		
+    		byte[]remainBytes=ConvertBitToByte(remain);
+    		
+    		System.arraycopy(remainBytes, 0, outputData,fileLength*8 , fileByteLength-fileLength*8);
     		
     		
+    		writeFile(outputPath, outputData, true);
+    		alreadyread=false;
+
     	}else if(type.equals("RC4")) {
     		progressNow=0;
     		byte[]keySeed=keyStr.getBytes();
@@ -79,9 +190,23 @@ public class FileProcessingAPI {
     		writeFile(outputPath, data, true);
     		alreadyread=false;
     	}else if(type.equals("AES-256")) {
-    		
-    		
-    		
+    		// NeedFix
+    		// 暂未实现,现用AES-128代替
+    		progressNow=0;
+            byte[]key=keyStr.getBytes();
+            
+            byte[]data=readFile(filePath, true);
+            fileLength=data.length/16;
+            alreadyread=true;
+            
+            byte[]tmp=new byte[16];
+            for(progressNow=0;progressNow<data.length/16;progressNow++){
+                tmp=encryptTools.aes.encrypt.ENCRYPT.encryptData(Arrays.copyOfRange(data,progressNow*16, progressNow*16+16), key);
+                System.arraycopy(tmp, 0, data, progressNow*16, 16);
+            }
+            writeFile(outputPath, data, true);
+            alreadyread=false;
+    		    		
     	}else { //AES-128
     		progressNow=0;
             byte[]key=keyStr.getBytes();
@@ -147,7 +272,7 @@ public class FileProcessingAPI {
     	try(FileOutputStream output=new FileOutputStream(file)){
     		if(isNormal) {
     			output.write(outputData);
-    		}else {
+    		}else { //好像可以不用
     			byte[]outputBytes=ConvertBitToByte(outputData);
     			output.write(outputBytes);
     		}

@@ -184,10 +184,17 @@ public class GUIFrame extends JFrame {
 	                    	String key=new String(password.getPassword());
 	                        //System.out.println(key);
 	                        if(key.length()!=16){
-	                            if(key.length()<5){
+	                        	if(HandleType.equals("DES")) {
+	                        		if(key.getBytes().length>8) {
+		                        		isNormal=false;
+		                            	JOptionPane.showMessageDialog(null, "由于DES算法本身限制\n您不能使用超过字节的密码", "错误",JOptionPane.ERROR_MESSAGE);
+	                        		}
+	                            }
+	                        	else if(key.length()<5){
 	                                isNormal=false;
 	                                JOptionPane.showMessageDialog(null, "密码过短", "错误",JOptionPane.ERROR_MESSAGE);
-	                            }else if(key.length()>16){
+	                            }
+	                            else if(key.length()>16){
 	                                isNormal=false;
 	                                JOptionPane.showMessageDialog(null, "密码过长", "错误",JOptionPane.ERROR_MESSAGE);
 	                            }else{
@@ -222,7 +229,11 @@ public class GUIFrame extends JFrame {
 	                                    isNormal=false;
 	                                }
 	                                if(isNormal){
-	                                    if(ENorDEorNochoose==1){
+	                                    if(HandleType.equals("DES")) {
+	                                    	JOptionPane.showMessageDialog(null, "DES算法已经不够安全,且速度较慢\n只适合加密简单文件","警告",JOptionPane.WARNING_MESSAGE);
+	                                    }
+	                                    
+	                                	if(ENorDEorNochoose==1){
 	                                        TipEn waitTip=new TipEn();
 	                                        Encrypt en=new Encrypt(key, filePath, outputPath,HandleType);
 	                                        waitTip.setPriority(Thread.MAX_PRIORITY);
