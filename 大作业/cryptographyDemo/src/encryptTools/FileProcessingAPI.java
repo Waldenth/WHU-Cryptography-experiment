@@ -39,17 +39,35 @@ public class FileProcessingAPI {
     		}//密码64比特转换结束
     		
     		byte[]data=readFile(filePath, false);
+    		
+    		/*
+    		for(int i=0;i<data.length;i++) {
+    			System.out.print(data[i]);
+    			if((i+1)%8==0) {
+    				System.out.println("");
+    			}
+    		}
+    		
+    		
+    		byte []tmpData=ConvertBitToByte(data);
+    		
+    		for(int i=0;i<tmpData.length;i++) {
+    			System.out.print(tmpData[i]+" ");
+    		}
+    		*/
+    		
+    		
     		fileLength=data.length/64; //DES一个文件长度64bit
     		int fileByteLength=data.length/8;
     		int fileBitLength=data.length;
     		
-    		System.out.println("BitLength="+fileBitLength);
+    		//System.out.println("BitLength="+fileBitLength);
     		
     		alreadyread=true;
     		
     		byte[]outputData=new byte[fileByteLength];
     		for(progressNow=0;progressNow<fileLength;progressNow++) {
-    			byte[]tmpTextBit=encryptTools.des.encrypt.DECRYPT_des.decryptData(Arrays.copyOfRange(data,progressNow*64,progressNow*64+64), bitKey);
+    			byte[]tmpTextBit=encryptTools.des.encrypt.ENCRYPT_des.encryptData(Arrays.copyOfRange(data,progressNow*64,progressNow*64+64), bitKey);
     			//System.arraycopy(tmpText,0,data, progressNow*64, 64);
     			byte[]tmpTextByte=ConvertBitToByte(tmpTextBit);
     			System.arraycopy(tmpTextByte, 0, outputData, progressNow*8, 8);
@@ -63,6 +81,11 @@ public class FileProcessingAPI {
     		
     		System.arraycopy(remainBytes, 0, outputData,fileLength*8 , fileByteLength-fileLength*8);
     		
+    		/*
+    		for(int i=0;i<outputData.length;i++) {
+    			System.out.print(outputData[i]+" ");
+    		}
+    		*/
     		
     		writeFile(outputPath, outputData, true);
     		alreadyread=false;
@@ -146,11 +169,19 @@ public class FileProcessingAPI {
     		}//密码64比特转换结束
     		
     		byte[]data=readFile(filePath, false);
+    		
+    		/*
+    		byte []tmpData=ConvertBitToByte(data);
+    		for(int i=0;i<tmpData.length;i++) {
+    			System.out.print(tmpData[i]+" ");
+    		}
+    		*/
+    		
     		fileLength=data.length/64; //DES一个文件长度64bit
     		int fileByteLength=data.length/8;
     		int fileBitLength=data.length;
     		
-    		System.out.println("BitLength="+fileBitLength);
+    		//System.out.println("BitLength="+fileBitLength);
     		
     		alreadyread=true;
     		
@@ -170,6 +201,11 @@ public class FileProcessingAPI {
     		
     		System.arraycopy(remainBytes, 0, outputData,fileLength*8 , fileByteLength-fileLength*8);
     		
+    		/*
+    		for(int i=0;i<outputData.length;i++) {
+    			System.out.print(outputData[i]+" ");
+    		}
+    		*/
     		
     		writeFile(outputPath, outputData, true);
     		alreadyread=false;
@@ -241,6 +277,14 @@ public class FileProcessingAPI {
     			byte[]getData=new byte[(int)file.length()];
     			byte[]BitgetData=new byte[(int)(getData.length*8)];
     			input.read(getData);
+    			
+    			/*
+    			for(int i=0;i<getData.length;i++) {
+    				System.out.print(getData[i]+" ");
+    			}
+    			System.out.println("");
+    			*/
+    			
     			input.close();
     			for(int i=0;i<getData.length;i++) {
     				String tmp=Integer.toBinaryString(getData[i]); // 生成的字符串二进制可能不是8位
@@ -252,7 +296,7 @@ public class FileProcessingAPI {
     	                tmp=tmp.substring(tmp.length()-8);
     	            }
     				for(int j=0;j<8;j++) {
-    					BitgetData[i+j]=(byte)(tmp.charAt(j)-'0');
+    					BitgetData[i*8+j]=(byte)(tmp.charAt(j)-'0');
     				}
     			}
     			System.out.println("file has already been read in memory");
