@@ -8,6 +8,8 @@ import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 
 import encryptTools.FileProcessingAPI;
+import hash.MessageDigestUtil;
+import jdbc.DatabaseManager;
 
 //import encryptFileGUI.GUItools.Encrypt;
 //import encryptTools.aes.FileAPI;
@@ -21,6 +23,8 @@ import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -187,7 +191,7 @@ public class GUIFrame extends JFrame {
 	                        	if(HandleType.equals("DES")) {
 	                        		if(key.getBytes().length>8) {
 		                        		isNormal=false;
-		                            	JOptionPane.showMessageDialog(null, "由于DES算法本身限制\n您不能使用超过字节的密码", "错误",JOptionPane.ERROR_MESSAGE);
+		                            	JOptionPane.showMessageDialog(null, "由于DES算法本身限制\n您不能使用超过8字节的密码", "错误",JOptionPane.ERROR_MESSAGE);
 	                        		}
 	                            }
 	                        	else if(key.length()<5){
@@ -229,6 +233,7 @@ public class GUIFrame extends JFrame {
 	                                    isNormal=false;
 	                                }
 	                                if(isNormal){
+	                                	
 	                                    if(HandleType.equals("DES")) {
 	                                    	JOptionPane.showMessageDialog(null, "DES算法已经不够安全,且速度较慢\n只适合加密简单文件","警告",JOptionPane.WARNING_MESSAGE);
 	                                    }
@@ -251,7 +256,43 @@ public class GUIFrame extends JFrame {
 	                                    t.schedule(new TimerTask(){
 	                                        public void run(){
 	                                            if(caninformUser){
-	                                                JOptionPane.showMessageDialog(null, "文件处理成功", "提示", JOptionPane.INFORMATION_MESSAGE); 
+	                                            	if(ENorDEorNochoose==1) { //这是加密操作
+	                                            		String originalFileHash=MessageDigestUtil.getDigest(filePath, "sha-256");
+	                                            		String encryptFileHash=MessageDigestUtil.getDigest(filePath.substring(0,filePath.length()-fileName.length())+"Encrypted_"+fileName, "sha-256");
+	                                            		String sqlString="insert into  hash_check(originalHash,encryptHash) "
+	                                            				+ "values ('"+originalFileHash
+	                                            				+"','"
+	                                            				+encryptFileHash+"')"
+	                                            				+ " on duplicate key update "
+	                                            				+ " originalHash='"+originalFileHash
+	                                            				+ "',encryptHash='"+encryptFileHash+"'";
+	                                            		DatabaseManager.connect();
+	                                            		DatabaseManager.execute(sqlString);
+	                                            		DatabaseManager.close();
+	                                            		JOptionPane.showMessageDialog(null, "文件加密成功\n数据库已入档!", "提示", JOptionPane.INFORMATION_MESSAGE); 
+	                                            	}else if(ENorDEorNochoose==2) { //这是解密操作
+	                                            		String encryptFileHash=MessageDigestUtil.getDigest(filePath, "sha-256");
+	                                            		String curDecryptFileHash=MessageDigestUtil.getDigest(filePath.substring(0,filePath.length()-fileName.length())+"Decrypted_"+fileName, "sha-256");
+	                                            		String sqlString="SELECT originalHash FROM hash_check WHERE encryptHash="+"'"+encryptFileHash +"'";   
+	                                            		DatabaseManager.connect();
+	                                            		ResultSet rs=DatabaseManager.query(sqlString);
+	                                            		if(rs!=null) {
+	                                            			String originalFileHash=null;
+	                                            			try {
+																while(rs.next()) {
+																	originalFileHash=rs.getString("originalHash");
+																}
+															} catch (SQLException e) {
+																// TODO 自动生成的 catch 块
+																e.printStackTrace();
+															}
+	                                            			JOptionPane.showMessageDialog(null, "文件已解密!\n"+"原有文件Hash为 "+originalFileHash+"\n"
+	                                            					+"解密文件Hash为 "+curDecryptFileHash, "提示", JOptionPane.INFORMATION_MESSAGE);  
+	                                            		}else {
+	                                            			JOptionPane.showMessageDialog(null, "查找原文件哈希失败\n无法保证解密文件准确性", "错误", JOptionPane.ERROR_MESSAGE);
+	                                            		}
+	                                            		DatabaseManager.close();
+	                                            	}
 	                                                t.cancel();
 	                                            }
 	                                        }
