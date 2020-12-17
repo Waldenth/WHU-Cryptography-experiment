@@ -101,4 +101,8 @@ public class ENCRYPT {
         System.out.println("");
     }
 
+    public static void main(String[]args){
+        TestEncrypt();
+    }
+
 }

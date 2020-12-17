@@ -135,4 +135,8 @@ public class RoundFunction {
         }
     }
 
+    public static void main(String[]args){
+        TestRoundFunction();
+    }
+
 }

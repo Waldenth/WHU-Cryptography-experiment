@@ -112,10 +112,10 @@ public class Test {
         String recover=new String(byteArray,"UTF-8");
         System.out.println(recover);
         */
-        //TestEncrypt();
-        //TestDecrypt();
-        EncryptFiles("key.txt","data.txt");
-        DecryptFiles("key.txt", "密文.txt");
+        TestEncrypt();
+        TestDecrypt();
+        //EncryptFiles("key.txt","data.txt");
+        //DecryptFiles("key.txt", "密文.txt");
     }
     //给定路径,加密文件,暂时只支持UTF-8    
     public static boolean EncryptFiles(String keyPath,String filePath) throws IOException{

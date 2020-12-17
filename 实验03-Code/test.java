@@ -3,6 +3,5 @@ public class test {
         waitingTips tip=new waitingTips(); 
         tip.InitEncryptShow();
         tip.show();
-        
     }
 }

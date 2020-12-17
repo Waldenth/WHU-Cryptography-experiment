@@ -82,5 +82,9 @@ public class DECRYPT {
         }
         System.out.println("");
     }
+
+    public static void main(String[]args){
+        TestDecrypt();
+    }
    
 }
