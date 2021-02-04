@@ -45,13 +45,13 @@ public class Oplus {
     }
     
     public static void main(String[]args){
-        int[]P={781,1583};
-        int[]Q={1863,518};
+        int[]P={136,113};
+        int[]Q={1042,435};
         int []R=oplus(P, Q);
         System.out.println("("+R[0]+","+R[1]+")");
-        P[0]=1291;
-        P[1]=1442;
-        R=Otimes.otimes(P,856);
+        P[0]=1424;
+        P[1]=660;
+        R=Otimes.otimes(P,1614);
         System.out.println("("+R[0]+","+R[1]+")");
     }
     
